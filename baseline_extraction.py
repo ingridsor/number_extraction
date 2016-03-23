@@ -5,13 +5,9 @@
 # For filesystem support
 import os, re
 
-
-def cut_extras(number_list):
-    number = ''
-    for item in number_list:
-        item = item.replace(' ','').replace('(','').replace(')','')
-        number += item + ' '
-    return number
+def cut_extras(number):
+    number_cut = number.replace(' ','').replace('(','').replace(')','')
+    return number_cut
 
 # Folder where the transcriptions reside as xml files
 # TO BE ADAPTED TO YOUR OWN COMPUTER
@@ -19,7 +15,7 @@ folder = "/home/ingrid/Documents/Utbildning/MPLT/speech/project/xml_data"
 
 files = os.listdir(folder)
 # To remove possible ~-files from Emacs made when making test files...
-files = [x for x in files if not x.endswith('~')]
+files = [x for x in files if x.endswith('.b.xml')]
 j = 0 # Counter for found numbers
 res_file = 'results_baseline.txt' # file for results
 print("Transcript files to go through: ",files)
@@ -33,11 +29,11 @@ for file in files:
     
     # Change directory to the path with xml files
     os.chdir(folder)
-    with open(file, 'r') as fin:
+    with open(file, 'r', encoding='ISO-8859-1') as fin:
         print("Now looking at file: ", file)
 
         # Finding name of subject for saving of result.
-        s = re.search(r'(.*).xml',file)
+        s = re.search(r'(.*)\.b\.xml',file)
         subject = s.group(1)
         print('Subject: ', subject)
 
@@ -55,11 +51,11 @@ for file in files:
         # Needs to find numbers with spaces in between as the numbers
         # are sometimes split up by the ASR and then separated by spaces
         # in script when finding transcription
-        number_list = re.findall(r"\d+(?: \d+)*", transcription)
+        n = re.search(r"\d+(?: \d+)*", transcription)
             
-        if number_list != []:
+        if n != None:
             nr_found = True
-            number = cut_extras(number_list)
+            number = cut_extras(n.group())
     
     if nr_found == True:
         
