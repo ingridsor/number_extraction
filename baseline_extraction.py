@@ -6,8 +6,11 @@
 import os, re
 
 
-def cut_extras(number):
-    number = number.replace(' ','').replace('(','').replace(')','')
+def cut_extras(number_list):
+    number = ''
+    for item in number_list:
+        item = item.replace(' ','').replace('(','').replace(')','')
+        number += item + ' '
     return number
 
 # Folder where the transcriptions reside as xml files
@@ -52,12 +55,11 @@ for file in files:
         # Needs to find numbers with spaces in between as the numbers
         # are sometimes split up by the ASR and then separated by spaces
         # in script when finding transcription
-        n = re.search(r"(\d+(?: \d+)*)", transcription)
+        number_list = re.findall(r"\d+(?: \d+)*", transcription)
             
-        if n != None:
+        if number_list != []:
             nr_found = True
-            number = n.group(1)
-            number = cut_extras(number)
+            number = cut_extras(number_list)
     
     if nr_found == True:
         
@@ -69,7 +71,7 @@ for file in files:
         # If a result file exists, give new name (first time only)
         i = 1
         while os.path.isfile(res_file) and j == 0:
-            res_file = 'results' + str(i) + '.txt'
+            res_file = 'results_baseline' + str(i) + '.txt'
             i += 1
         
         # Appending phone number to result file
