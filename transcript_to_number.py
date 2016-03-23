@@ -31,7 +31,7 @@ cc_dict = {376:[1,6,9],43:[0,4,13],32:[0,8,9],359:[0,7,9],385:[0,8,9],357:[1,8],
 
 files = os.listdir(folder)
 # To remove possible ~-files from Emacs made when making test files...
-files = [x for x in files if not x.endswith('~')]
+files = [x for x in files if x.endswith('.b.xml')]
 j = 0 # Counter for found numbers
 res_file = 'results.txt' # file for results
 print("Transcript files to go through: ",files)
@@ -45,11 +45,11 @@ for file in files:
     
     # Change directory to the path with xml files
     os.chdir(folder)
-    with open(file, 'r') as fin:
+    with open(file, 'r', encoding='ISO-8859-1') as fin:
         print("Now looking at file: ", file)
 
         # Finding name of subject for saving of result.
-        s = re.search(r'(.*).xml',file)
+        s = re.search(r'(.*).b.xml',file)
         if s != None:
             subject = s.group(1)
         print('Subject: ', subject)
@@ -139,7 +139,7 @@ for file in files:
                 number = cut_extras(number)
                 n2 = re.search(r"(\d{6,10})", number)
                 if n2 != None:
-                    print('Number was found after "phone phrases"! ',n2)
+                    print('Number was found after "phone phrases"!')
                     number = n2.group(1)
                     nr_found = True
     
