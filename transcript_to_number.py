@@ -49,7 +49,7 @@ for file in files:
         print("Now looking at file: ", file)
 
         # Finding name of subject for saving of result.
-        s = re.search(r'(.*).b.xml',file)
+        s = re.search(r'(.*)\.b\.xml',file)
         if s != None:
             subject = s.group(1)
         print('Subject: ', subject)
