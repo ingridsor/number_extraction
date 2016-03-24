@@ -120,6 +120,7 @@ for file in files:
 
         else:
             # Checking for a key phrase to indicate there will be a number coming up
+            # or just a number starting with 07 of length 9-13, considered the common mobile phone number
             n1 = re.search(r"""(?:number\ is\                  # With number directly following
                                |call\ me(?:\ on|at)\           # -||-
                                |(?:my|phone)\ number\D{1,50}?) # Every number following 1-30 chars after "phone number" or "my number"
@@ -129,19 +130,23 @@ for file in files:
                                \d+                             # Number (first part or whole number)
                                \)?                             # Number possibly ends with parenthesis
                                (?:\ \(?\d+\)?)*                # Possibly numbers following space
-                               )                        
+                               )
+                               |((07\d{7,11}))
                                """,transcription, flags=re.I|re.X) # Ignoring case
             
             if n1 != None:
-                number_pre = n1.group(1)
+                if n1.group(1) == None:
+                    number_pre = n1.group(0)
+                else:
+                    number_pre = n1.group(1)
+
                 number_pre = cut_extras(number_pre)
+
                 n2 = re.search(r'''(07(6|3|0)\d{7})   # A Swedish mobile number only has 10 digits in total
                                    |(\d{6,13})        # Other numbers are accepted a bit "looser"
                                    ''', number_pre, re.X)
                 if n2 != None:
-                    print('Number was found after "phone phrases"!')
                     number = n2.group()
-                    print(number)
 
                     
     ##### Printing results #####
