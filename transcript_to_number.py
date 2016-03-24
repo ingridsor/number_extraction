@@ -41,7 +41,6 @@ for file in files:
     # Setting empty transcription string for each file
     transcription = ''
     number = ''
-    nr_found = False
     
     # Change directory to the path with xml files
     os.chdir(folder)
@@ -79,8 +78,8 @@ for file in files:
                 
                 # If there is a number found with country code first
                 if n1 != None:
-                    number = n1.group()
-                    number = cut_extras(number)
+                    number_pre = n1.group()
+                    number_pre = cut_extras(number_pre)
 
                     if n1.group(1) != None:
                         country_code = int(n1.group(1).replace('+','').replace('00','')) # Removing + and make into int
@@ -99,7 +98,7 @@ for file in files:
                                                ((?:(?:\+)|(?:00))  # Either + or 00
                                                {0})                # String 'item', i.e. country code
                                                \d{{{1},{2}}}       # The rest of the number has x-y digits
-                                               """.format(country_code,minl,maxl), number, re.VERBOSE)
+                                               """.format(country_code,minl,maxl), number_pre, re.VERBOSE)
                 
                         # In the case of all possible length values listed in dictionary (1 as first item in language list)
                         # Finds the longest number acceptable in that country
@@ -110,11 +109,10 @@ for file in files:
                                                   ((?:(?:\+)|(?:00))  # Either + or 00
                                                   {0})                # String 'item', i.e. country code
                                                   \d{{{1}}}           # The rest of the number has x digits
-                                                  """.format(country_code,item), number, re.VERBOSE)
+                                                  """.format(country_code,item), number_pre, re.VERBOSE)
                                 
                         # If a number is found in either of the two regex searches above
                         if n2 != None:
-                            nr_found = True
                             number = n2.group(0)
                             print("Number found after country code search: ", number)
 
@@ -124,7 +122,7 @@ for file in files:
             # Checking for a key phrase to indicate there will be a number coming up
             n1 = re.search(r"""(?:number\ is\                  # With number directly following
                                |call\ me(?:\ on|at)\           # -||-
-                               |(?:my|phone)\ number\D{1,30}?) # Every number following 1-30 chars after "phone number" or "my number"
+                               |(?:my|phone)\ number\D{1,50}?) # Every number following 1-30 chars after "phone number" or "my number"
                                (                               # Catch number
                                \(?                             # Number possibly starts with parenthesis (for some reason)
                                \+?                             # Number possibly starts with +
@@ -135,33 +133,37 @@ for file in files:
                                """,transcription, flags=re.I|re.X) # Ignoring case
             
             if n1 != None:
-                number = n1.group(1)
-                number = cut_extras(number)
-                n2 = re.search(r"(\d{6,10})", number)
+                number_pre = n1.group(1)
+                number_pre = cut_extras(number_pre)
+                n2 = re.search(r'''(07(6|3|0)\d{7})   # A Swedish mobile number only has 10 digits in total
+                                   |(\d{6,13})        # Other numbers are accepted a bit "looser"
+                                   ''', number_pre, re.X)
                 if n2 != None:
                     print('Number was found after "phone phrases"!')
-                    number = n2.group(1)
-                    nr_found = True
+                    number = n2.group()
+                    print(number)
+
+                    
+    ##### Printing results #####
+    # Check results folder exists or create
+    if not os.path.isdir('../results'):
+        os.makedirs('../results')
+    os.chdir('../results')
+        
+    # If a result file exists, give new name (first time only)
+    i = 1
+    while os.path.isfile(res_file) and j == 0:
+        res_file = 'results' + str(i) + '.txt'
+        i += 1
+        
+    # Appending phone number to result file
+    to_print = subject + ', ' + number + '\n'
+    with open(res_file,'a') as fout:
+        fout.write(to_print)
+
+    j += 1
     
-    if nr_found == True:
-        
-        # Check results folder exists or create
-        if not os.path.isdir('../results'):
-            os.makedirs('../results')
-        os.chdir('../results')
-        
-        # If a result file exists, give new name (first time only)
-        i = 1
-        while os.path.isfile(res_file) and j == 0:
-            res_file = 'results' + str(i) + '.txt'
-            i += 1
-        
-        # Appending phone number to result file
-        to_print = subject + ', ' + number + '\n'
-        with open(res_file,'a') as fout:
-            fout.write(to_print)
-            
+    if number != '':
         print("Phone number found: ",number,'\n')
-        j += 1
     else:
         print('No phone number found.\n')
