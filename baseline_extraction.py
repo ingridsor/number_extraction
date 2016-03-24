@@ -25,7 +25,6 @@ for file in files:
     # Setting empty transcription string for each file
     transcription = ''
     number = ''
-    nr_found = False
     
     # Change directory to the path with xml files
     os.chdir(folder)
@@ -54,28 +53,28 @@ for file in files:
         n = re.search(r"\d+(?: \d+)*", transcription)
             
         if n != None:
-            nr_found = True
             number = cut_extras(n.group())
     
-    if nr_found == True:
+    ##### Printing results #####
+    # Check results folder exists or create
+    if not os.path.isdir('../results'):
+        os.makedirs('../results')
+    os.chdir('../results')
         
-        # Check results folder exists or create
-        if not os.path.isdir('../results'):
-            os.makedirs('../results')
-        os.chdir('../results')
+    # If a result file exists, give new name (first time only)
+    i = 1
+    while os.path.isfile(res_file) and j == 0:
+        res_file = 'results_baseline' + str(i) + '.txt'
+        i += 1
         
-        # If a result file exists, give new name (first time only)
-        i = 1
-        while os.path.isfile(res_file) and j == 0:
-            res_file = 'results_baseline' + str(i) + '.txt'
-            i += 1
-        
-        # Appending phone number to result file
-        to_print = subject + ', ' + number + '\n'
-        with open(res_file,'a') as fout:
-            fout.write(to_print)
-            
+    # Appending phone number to result file
+    to_print = subject + ', ' + number + '\n'
+    with open(res_file,'a') as fout:
+        fout.write(to_print)
+
+    j += 1
+    
+    if number != '':
         print("Phone number found: ",number,'\n')
-        j += 1
     else:
         print('No phone number found.\n')
