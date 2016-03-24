@@ -1,6 +1,5 @@
-import sys, difflib, re
+import sys, difflib
 
-# Result file as first argument, gold file as second
 fileA = sys.argv[1]
 fileB = sys.argv[2]
 
